@@ -1,7 +1,7 @@
 package models
 
 import (
-	Connect "bookstore/pkg/database"
+	Connect "github.com/shubham/bookstore/pkg/database"
 
 	"github.com/jinzhu/gorm"
 )

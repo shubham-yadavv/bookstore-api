@@ -1,4 +1,4 @@
-module bookstore
+module github.com/shubham/bookstore
 
 go 1.17
 
