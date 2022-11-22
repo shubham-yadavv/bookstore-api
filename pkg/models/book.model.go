@@ -5,7 +5,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// Book model
 type Book struct {
 	gorm.Model
 	ID     uuid.UUID `gorm:"type:uuid"`
