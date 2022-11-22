@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/gofiber/fiber/v2"
-
 	"github.com/shubham/bookstore/pkg/config"
 	"github.com/shubham/bookstore/pkg/database"
 	"github.com/shubham/bookstore/pkg/routes"
