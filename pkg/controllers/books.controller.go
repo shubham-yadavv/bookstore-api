@@ -37,7 +37,7 @@ func GetBook(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"status": "success", "message": "Book Found", "data": book})
 }
 
-func CreateBooks(c *fiber.Ctx) error {
+func CreateBook(c *fiber.Ctx) error {
 	db := database.DB
 	book := new(models.Book)
 
