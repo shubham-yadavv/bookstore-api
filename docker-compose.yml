@@ -1,0 +1,25 @@
+version: '3.4'
+
+services:
+  bookstore:
+    image: bookstore
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - 3000:3000
+    volumes:
+      - .:/app
+    depends_on:
+      - postgres
+  
+  postgres:
+    image: postgres:9.6
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: jarvis22121
+      POSTGRES_DB: bookstore
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
