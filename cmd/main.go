@@ -2,28 +2,22 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 
-	"github.com/gofiber/fiber/v2"
-	"github.com/shubham/bookstore/pkg/config"
-	"github.com/shubham/bookstore/pkg/database"
+	"github.com/shubham/bookstore/pkg/models"
 	"github.com/shubham/bookstore/pkg/routes"
 )
 
 func main() {
-	app := fiber.New()
 
-	database.ConnectDB()
+	models.ConnectDatabase()
+	routes.SetupRoutes()
 
-	app.Get("/", func(c *fiber.Ctx) error {
-		err := c.SendString("And the API is UP!")
-		return err
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "Hello World")
 	})
 
-	routes.SetupRoutes(app)
-
-	port := config.Config("PORT")
-
-	fmt.Println("Server is running on port " + port)
-	app.Listen(":" + port)
+	http.ListenAndServe(":3000", nil)
+	fmt.Println("Server started on port 3000")
 
 }

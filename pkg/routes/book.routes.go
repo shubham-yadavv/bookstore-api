@@ -1,16 +1,15 @@
 package routes
 
 import (
-	"github.com/gofiber/fiber/v2"
+	"net/http"
+
 	"github.com/shubham/bookstore/pkg/controllers"
 )
 
-func SetupRoutes(router fiber.Router) {
-	books := router.Group("/books")
-
-	books.Post("/", controllers.CreateBook)
-	books.Get("/", controllers.GetBooks)
-	books.Get("/:id", controllers.GetBook)
-	books.Put("/:id", controllers.UpdateBook)
-	books.Delete("/:id", controllers.DeleteBook)
+func SetupRoutes() {
+	http.HandleFunc("/books/create", controllers.CreateBook)
+	http.HandleFunc("/books", controllers.GetBooks)
+	http.HandleFunc("/book", controllers.GetBookById)
+	http.HandleFunc("/books/update", controllers.UpdateBook)
+	http.HandleFunc("/books/delete", controllers.DeleteBook)
 }

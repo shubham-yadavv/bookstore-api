@@ -1,126 +1,83 @@
 package controllers
 
 import (
-	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
-	"github.com/shubham/bookstore/pkg/database"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+
 	"github.com/shubham/bookstore/pkg/models"
 )
 
-func GetBooks(c *fiber.Ctx) error {
-	db := database.DB
+func CreateBook(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var book models.Book
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+
+		http.Error(w, err.Error(), http.StatusBadRequest)
+
+		return
+	}
+	err = json.Unmarshal(body, &book)
+	if err != nil {
+
+		http.Error(w, err.Error(), http.StatusBadRequest)
+
+		return
+	}
+
+	models.DB.Create(&book)
+	json.NewEncoder(w).Encode(book)
+}
+
+func GetBooks(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	var books []models.Book
-
-	db.Find(&books)
-
-	if len(books) == 0 {
-		return c.Status(404).JSON(fiber.Map{
-			"message": "No books found",
-		})
-	}
-
-	return c.JSON(fiber.Map{"status": "success", "message": "Books Found", "data": books})
+	models.DB.Find(&books)
+	json.NewEncoder(w).Encode(books)
 }
 
-func GetBook(c *fiber.Ctx) error {
-	db := database.DB
+func GetBookById(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	var book models.Book
-
-	id := c.Params("id")
-
-	db.Find(&book, "id = ?", id)
-
-	if book.ID == uuid.Nil {
-		return c.Status(404).JSON(fiber.Map{"status": "error", "message": "No Book present", "data": nil})
-	}
-
-	return c.JSON(fiber.Map{"status": "success", "message": "Book Found", "data": book})
+	id := r.URL.Query().Get("id")
+	models.DB.First(&book, id)
+	json.NewEncoder(w).Encode(book)
 }
 
-func CreateBook(c *fiber.Ctx) error {
-	db := database.DB
-	book := new(models.Book)
-
-	err := c.BodyParser(book)
-
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "Review your input", "data": err})
-	}
-
-	book.ID = uuid.New()
-
-	err = db.Create(&book).Error
-
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "Could not create book", "data": err})
-	}
-
-	return c.JSON(fiber.Map{"status": "success", "message": "Created Book", "data": book})
-
-}
-
-func UpdateBook(c *fiber.Ctx) error {
-	type updateBook struct {
-		Title  string `json:"title"`
-		Author string `json:"author"`
-	}
-	db := database.DB
+func UpdateBook(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	var book models.Book
-
-	id := c.Params("id")
-
-	db.Find(&book, "id = ?", id)
-
-	if book.ID == uuid.Nil {
-		return c.Status(404).JSON(fiber.Map{"status": "error", "message": "No note present", "data": nil})
-	}
-
-	var updateBookData updateBook
-	err := c.BodyParser(&updateBookData)
+	id := r.URL.Query().Get("id")
+	models.DB.First(&book, id)
+	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "Review your input", "data": err})
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		json.NewEncoder(w).Encode(err)
+		fmt.Println(err)
+
+		return
 	}
+	err = json.Unmarshal(body, &book)
+	if err != nil {
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		json.NewEncoder(w).Encode(err)
+		fmt.Println(err)
 
-	book.Title = updateBookData.Title
-	book.Author = updateBookData.Author
-
-	db.Save(&book)
-
-	return c.JSON(fiber.Map{"status": "success", "message": "Books Found", "data": book})
-
+		return
+	}
+	models.DB.Save(&book)
+	json.NewEncoder(w).Encode(book)
 }
 
-func DeleteBook(c *fiber.Ctx) error {
-	db := database.DB
-	var book models.Book
-
-	id := c.Params("id")
-
-	db.Find(&book, "id = ?", id)
-
-	if book.ID == uuid.Nil {
-		return c.Status(404).JSON(fiber.Map{"status": "error", "message": "No note present", "data": nil})
-	}
-
-	err := db.Delete(&book, "id = ?", id).Error
-
-	if err != nil {
-		return c.Status(404).JSON(fiber.Map{"status": "error", "message": "Failed to delete book", "data": nil})
-	}
-
-	return c.JSON(fiber.Map{"status": "success", "message": "Deleted book"})
-
-}
-
-func DeleteAllBooks(c *fiber.Ctx) error {
-	db := database.DB
-	var books []models.Book
-
-	db.Find(&books)
-	db.Delete(&books)
-
-	return c.JSON(fiber.Map{
-		"message": "All books deleted",
-	})
+func DeleteBook(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	book := models.Book{}
+	id := r.URL.Query().Get("id")
+	models.DB.First(&book, id)
+	models.DB.Delete(&book)
+	json.NewEncoder(w).Encode(book)
+	fmt.Fprintf(w, "Book with id %s deleted successfully", id)
 
 }

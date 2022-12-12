@@ -1,13 +1,11 @@
 package models
 
-import (
-	"github.com/google/uuid"
-	"gorm.io/gorm"
-)
+import "time"
 
 type Book struct {
-	gorm.Model
-	ID     uuid.UUID `gorm:"type:uuid"`
-	Title  string    `json:"title"`
-	Author string    `json:"author"`
+	ID        uint      `json:"id" gorm:"primaryKey"`
+	Title     string    `json:"title"`
+	Author    string    `json:"author"`
+	Year      int       `json:"year"`
+	CreatedAt time.Time `json:"created_at"`
 }
